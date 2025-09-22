@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyListener;
+import java.sql.SQLOutput;
 
 public class GamePanel extends JPanel implements Runnable {
 
@@ -42,42 +43,73 @@ public class GamePanel extends JPanel implements Runnable {
         gameThread.start();
     }
 
-    @Override
+//    @Override
+//    public void run() {
+//
+//        double drawInterval = 1000000000 / FPS; // 0.01666 seconds
+//        double nextDrawTime = System.nanoTime() + drawInterval;
+//
+//        // Game Loop (core of game)
+//        while (gameThread != null) {
+//
+//            // test initial run comment updating
+////            System.out.println("The game loop is running.");
+//
+//            // test time run output with nanoTime()
+////            long currentTime = System.nanoTime();
+////            System.out.println("current Time: " + currentTime);
+//
+//            // 1 UPDATE: update information such as character positions
+//            update();
+//
+//            // 2 UPDATE: draw the screen with the updated information
+//            repaint();
+//
+//            try {
+//                double remainingTime = nextDrawTime - System.nanoTime();
+//                remainingTime /= 1000000000;
+//
+//                if (remainingTime < 0) {
+//                    remainingTime = 0;
+//                }
+//
+//                Thread.sleep((long) remainingTime);
+//
+//                nextDrawTime += drawInterval;
+//
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
     public void run() {
 
-        double drawInterval = 1000000000 / FPS; // 0.01666 seconds
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double drawInterval = 1000000000 / FPS;
+        double deltaTime = 0;
+        long lastTime = System.nanoTime();
+        long currentTime;
+        long timer = 0;
+        int drawCount = 0;
 
-        // Game Loop (core of game)
         while (gameThread != null) {
 
-            // test initial run comment updating
-//            System.out.println("The game loop is running.");
+            currentTime = System.nanoTime();
 
-            // test time run output with nanoTime()
-//            long currentTime = System.nanoTime();
-//            System.out.println("current Time: " + currentTime);
+            deltaTime += (currentTime - lastTime) / drawInterval;
+            timer += currentTime - lastTime;
+            lastTime = currentTime;
 
-            // 1 UPDATE: update information such as character positions
-            update();
+            if (deltaTime >= 1) {
+                update();
+                repaint();
+                deltaTime--;
+                drawCount++;
+            }
 
-            // 2 UPDATE: draw the screen with the updated information
-            repaint();
-
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime /= 1000000000;
-
-                if (remainingTime < 0) {
-                    remainingTime = 0;
-                }
-
-                Thread.sleep((long) remainingTime);
-
-                nextDrawTime += drawInterval;
-
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if (timer >= 1000000000) {
+                System.out.println("FPS:" + drawCount);
+                drawCount = 0;
+                timer = 0;
             }
         }
     }
